@@ -1,5 +1,6 @@
 package com.actimust.play.spring
 
+import play.Logger
 import play.api.inject._
 import play.api._
 import play.core.{ DefaultWebCommands, WebCommands }

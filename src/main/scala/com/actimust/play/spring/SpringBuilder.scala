@@ -5,22 +5,14 @@ import java.lang.annotation.Annotation
 import javax.inject.Provider
 
 import org.springframework.beans.TypeConverter
-import org.springframework.beans.factory.FactoryBean
-import org.springframework.beans.factory.NoSuchBeanDefinitionException
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
-import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver
 import org.springframework.beans.factory.annotation.{AutowiredAnnotationBeanPostProcessor, QualifierAnnotationAutowireCandidateResolver}
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory
-import org.springframework.beans.factory.config.BeanDefinition
-import org.springframework.beans.factory.config.BeanDefinitionHolder
 import org.springframework.beans.factory.config.{AutowireCapableBeanFactory, BeanDefinition, BeanDefinitionHolder}
 import org.springframework.beans.factory.support._
 import org.springframework.beans.factory.{FactoryBean, NoSuchBeanDefinitionException, NoUniqueBeanDefinitionException}
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
+
 import play.api._
 import play.api.inject._
-import play.api._
 
 import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
@@ -53,7 +45,7 @@ abstract class SpringBuilder[Self] protected (
   /**
    * Set the environment mode.
    */
-  final def in(mode: Mode.Mode): Self =
+  final def in(mode: Mode): Self =
     copyBuilder(environment = environment.copy(mode = mode))
 
   /**
@@ -157,7 +149,7 @@ abstract class SpringBuilder[Self] protected (
     //build modules
     val modulesToRegister = applicationModule()
 
-    val disabledBindings = configuration.getStringSeq("play.bindings.disabled").getOrElse(Seq.empty)
+    val disabledBindings = configuration.getOptional[Seq[String]]("play.bindings.disabled").getOrElse(Seq.empty)
     val disabledBindingClasses: Seq[Class[_]] = disabledBindings.map(className => loadClass(className))
 
     //register modules
@@ -172,7 +164,7 @@ abstract class SpringBuilder[Self] protected (
       )
     }
 
-    val springConfig = configuration.getStringSeq("play.spring.configs").getOrElse(Seq.empty)
+    val springConfig = configuration.getOptional[Seq[String]]("play.spring.configs").getOrElse(Seq.empty)
     val confClasses: Seq[Class[_]] = springConfig.map(className => loadClass(className))
     if(confClasses.nonEmpty) {
       ctx.register(confClasses:_*)
@@ -288,8 +280,7 @@ class BindingKeyFactoryBean[T](key: BindingKey[T], objectType: Class[_], factory
 
   private def getNameFromMatches(candidates: Seq[String]): Option[String] = {
     candidates match {
-      case Nil => throw new NoSuchBeanDefinitionException(key.clazz, "Binding alias for type " + objectType + " to " + key,
-        "No bean found for binding alias")
+      case Nil => throw new NoSuchBeanDefinitionException(key.clazz, "No bean found for binding alias for type " + objectType + " to " + key)
       case single :: Nil => Some(single)
       case multiple => throw new NoUniqueBeanDefinitionException(key.clazz, multiple.asJava)
     }
@@ -302,7 +293,7 @@ class BindingKeyFactoryBean[T](key: BindingKey[T], objectType: Class[_], factory
 
   def getObjectType = objectType
 
-  def isSingleton = false
+  override def isSingleton = false
 }
 
 /**
@@ -323,7 +314,7 @@ class ProviderFactoryBean[T](provider: Provider[T], objectType: Class[_], factor
 
   def getObjectType = objectType
 
-  def isSingleton = false
+  override def isSingleton = false
 }
 
 /**

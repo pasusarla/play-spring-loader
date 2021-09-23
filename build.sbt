@@ -1,19 +1,19 @@
 
-version := "1.0.0-SNAPSHOT"
+version := "1.0.1"
 organization := "com.actimust"
-scalaVersion := "2.12.3"
+scalaVersion := "2.13.6"
 
 name := "play-spring-loader"
 crossPaths := false
 
-
 lazy val root = project in file(".")
 
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play" % "2.6.6",
-  "org.springframework" % "spring-context" % "4.3.5.RELEASE"
+  "com.typesafe.play" %% "play" % "2.8.8",
+  "org.springframework" % "spring-context" % "5.3.10"
 )
 
+/*
 publishMavenStyle := true
 
 publishTo := {
@@ -45,3 +45,4 @@ pomExtra :=
         <name>Remi Thieblibn</name>
       </developer>
     </developers>
+ */
